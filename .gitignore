@@ -112,3 +112,8 @@ stock-boot-unpacked/
 test-boot-unpacked/
 test-boot-final-unpacked/
 mkbootimg/
+
+# Local TB-X304L release/build artifacts
+final-Nikunj-*.img
+ksu-boot*.img
+out/

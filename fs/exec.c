@@ -64,6 +64,11 @@
 #include <trace/events/task.h>
 #include "internal.h"
 
+#ifdef CONFIG_KSU
+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
+			       void *argv, void *envp, int *flags);
+#endif
+
 #include <trace/events/sched.h>
 
 int suid_dumpable = 0;
@@ -1488,6 +1493,15 @@ static int do_execve_common(struct filename *filename,
 
 	if (IS_ERR(filename))
 		return PTR_ERR(filename);
+
+#ifdef CONFIG_KSU
+	{
+		int fd = AT_FDCWD;
+		struct filename *filename_ptr = filename;
+		ksu_handle_execveat(&fd, &filename_ptr, &argv, &envp, NULL);
+		filename = filename_ptr;
+	}
+#endif
 
 	/*
 	 * We move the actual failure in case of RLIMIT_NPROC excess from

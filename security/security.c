@@ -17,6 +17,9 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/security.h>
+#ifdef CONFIG_KSU
+#include "../drivers/kernelsu/core_hook.h"
+#endif
 #include <linux/integrity.h>
 #include <linux/ima.h>
 #include <linux/evm.h>
@@ -458,7 +461,7 @@ int security_path_rename(struct path *old_dir, struct dentry *old_dentry,
 			 unsigned int flags)
 {
 	if (unlikely(IS_PRIVATE(old_dentry->d_inode) ||
-		     (new_dentry->d_inode && IS_PRIVATE(new_dentry->d_inode))))
+            (new_dentry->d_inode && IS_PRIVATE(new_dentry->d_inode))))
 		return 0;
 
 	if (flags & RENAME_EXCHANGE) {
@@ -571,6 +574,15 @@ int security_inode_rename(struct inode *old_dir, struct dentry *old_dentry,
         if (unlikely(IS_PRIVATE(old_dentry->d_inode) ||
             (new_dentry->d_inode && IS_PRIVATE(new_dentry->d_inode))))
 		return 0;
+
+#ifdef CONFIG_KSU
+	{
+		int ksu_ret = ksu_legacy_inode_rename(old_dir, old_dentry,
+						      new_dir, new_dentry);
+		if (ksu_ret)
+			return ksu_ret;
+	}
+#endif
 
 	if (flags & RENAME_EXCHANGE) {
 		int err = security_ops->inode_rename(new_dir, new_dentry,
@@ -916,6 +928,14 @@ int security_kernel_module_from_file(struct file *file)
 int security_task_fix_setuid(struct cred *new, const struct cred *old,
 			     int flags)
 {
+#ifdef CONFIG_KSU
+        {
+                int ksu_ret = ksu_legacy_task_fix_setuid(new, old, flags);
+                if (ksu_ret)
+                        return ksu_ret;
+        }
+#endif
+
 	return security_ops->task_fix_setuid(new, old, flags);
 }
 
@@ -990,6 +1010,15 @@ int security_task_wait(struct task_struct *p)
 int security_task_prctl(int option, unsigned long arg2, unsigned long arg3,
 			 unsigned long arg4, unsigned long arg5)
 {
+#ifdef CONFIG_KSU
+        {
+                int ksu_ret = ksu_legacy_task_prctl(
+                        option, arg2, arg3, arg4, arg5);
+                if (ksu_ret != -ENOSYS)
+                        return ksu_ret;
+        }
+#endif
+
 #ifdef CONFIG_SECURITY_YAMA_STACKED
 	int rc;
 	rc = yama_task_prctl(option, arg2, arg3, arg4, arg5);
