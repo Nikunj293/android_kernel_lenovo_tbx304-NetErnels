@@ -206,6 +206,15 @@ else
                 srctree := $(KBUILD_SRC)
         endif
 endif
+
+# Default build identity for this kernel.
+KBUILD_BUILD_USER ?= Nikunj Agrawal
+KBUILD_BUILD_HOST ?= Nikunj
+KBUILD_BUILD_TIMESTAMP ?= $(shell git -C $(srctree) log -1 --format=%cD 2>/dev/null)
+export KBUILD_BUILD_USER KBUILD_BUILD_HOST KBUILD_BUILD_TIMESTAMP
+LOCALVERSION ?=
+export LOCALVERSION
+
 objtree		:= .
 src		:= $(srctree)
 obj		:= $(objtree)
