@@ -99,3 +99,16 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+
+# Local TB-X304L testing artifacts
+build.log
+custom-dmesg.txt
+stock-dmesg.txt
+stock-boot.img
+stock-dtb.dtb
+test-boot.img
+test-boot-final.img
+stock-boot-unpacked/
+test-boot-unpacked/
+test-boot-final-unpacked/
+mkbootimg/

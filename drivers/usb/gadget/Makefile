@@ -1,3 +1,4 @@
+ccflags-y += -I$(srctree)/drivers/usb/gadget/
 #
 # USB peripheral controller drivers
 #
